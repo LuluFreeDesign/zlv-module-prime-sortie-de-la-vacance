@@ -47,8 +47,6 @@ export function Callout({ type, title, message }: CalloutProps) {
           >
             {message}
           </p>
-          {!isSuccess && (
-          )}
         </div>
       </div>
     </div>
