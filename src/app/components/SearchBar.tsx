@@ -3,7 +3,7 @@ import { Search, X } from 'lucide-react';
 
 interface SearchBarProps {
   onSelectCommune: (commune: string, isEligible: boolean) => void;
-  communes: Array<{ name: string; isEligible: boolean }>;
+  communes: Array<{ name: string; isEligible: boolean; inseeCode?: string }>;
 }
 
 export function SearchBar({ onSelectCommune, communes }: SearchBarProps) {
@@ -13,10 +13,11 @@ export function SearchBar({ onSelectCommune, communes }: SearchBarProps) {
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Filter communes based on search query
+  // Filter communes based on search query (by name or INSEE code)
   const filteredCommunes = searchQuery.trim().length >= 2
     ? communes.filter((commune) =>
-        commune.name.toLowerCase().includes(searchQuery.toLowerCase())
+        commune.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (commune.inseeCode && commune.inseeCode.includes(searchQuery.trim()))
       ).slice(0, 10) // Limit to 10 results
     : [];
 
@@ -59,7 +60,7 @@ export function SearchBar({ onSelectCommune, communes }: SearchBarProps) {
     }
   };
 
-  const handleSelectCommune = (commune: { name: string; isEligible: boolean }) => {
+  const handleSelectCommune = (commune: { name: string; isEligible: boolean; inseeCode?: string }) => {
     onSelectCommune(commune.name, commune.isEligible);
     setSearchQuery('');
     setShowSuggestions(false);
@@ -76,17 +77,19 @@ export function SearchBar({ onSelectCommune, communes }: SearchBarProps) {
   const handleSearch = () => {
     if (!searchQuery.trim()) return;
     
-    // Search for exact match (case insensitive)
+    // Search for exact match (case insensitive) by name or INSEE code
     const exactMatch = communes.find(
-      (commune) => commune.name.toLowerCase() === searchQuery.trim().toLowerCase()
+      (commune) => commune.name.toLowerCase() === searchQuery.trim().toLowerCase() ||
+        (commune.inseeCode && commune.inseeCode === searchQuery.trim())
     );
     
     if (exactMatch) {
       handleSelectCommune(exactMatch);
     } else {
-      // If no exact match, try to find the first partial match
+      // If no exact match, try to find the first partial match by name or INSEE code
       const partialMatch = communes.find((commune) =>
-        commune.name.toLowerCase().includes(searchQuery.trim().toLowerCase())
+        commune.name.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
+        (commune.inseeCode && commune.inseeCode.includes(searchQuery.trim()))
       );
       
       if (partialMatch) {
@@ -139,7 +142,7 @@ export function SearchBar({ onSelectCommune, communes }: SearchBarProps) {
             }}
             onFocus={() => setShowSuggestions(true)}
             onKeyDown={handleKeyDown}
-            placeholder="Ex: La Rochette, Nantes..."
+            placeholder="Ex: La Rochette, Nantes, 73215..."
             className="flex-1 px-4 py-2.5 border-t border-l border-b transition-colors"
             style={{
               borderColor: 'var(--border)',
