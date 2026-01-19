@@ -48,15 +48,6 @@ export function Callout({ type, title, message }: CalloutProps) {
             {message}
           </p>
           {!isSuccess && (
-            <a
-              href="https://zerologementvacant.beta.gouv.fr/lutter-contre-la-vacance/les-aides-pour-les-proprietaires/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block mt-3 underline hover:no-underline"
-              style={{ color: 'var(--primary)' }}
-            >
-              Explorez les autres aides potentielles dont vous pourriez bénéficier
-            </a>
           )}
         </div>
       </div>
