@@ -49,7 +49,6 @@ export default function App() {
               <ul className="list-disc list-inside space-y-2 mb-6" style={{ color: 'var(--foreground)' }}>
                 <li>Le logement doit être vacant depuis au moins 2 ans</li>
                 <li>Les travaux doivent permettre une sortie de vacance effective</li>
-                <li>Le logement doit être situé dans une zone rurale définie par l'ANAH</li>
                 <li>Le projet doit respecter les critères de performance énergétique</li>
               </ul>
               
