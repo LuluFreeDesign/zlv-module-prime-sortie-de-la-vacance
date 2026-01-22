@@ -84,7 +84,7 @@ export default function App() {
                   Contacter mon conseiller
                 </a>
                 <a
-                  href="https://www.anah.gouv.fr/sites/default/files/2024-03/deliberation-202403-prime-sortie-vacance.pdf"
+                  href="https://aides-territoires.beta.gouv.fr/aides/prime-sortie-de-la-vacance/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-4 py-2 border hover:opacity-70 transition-opacity"
