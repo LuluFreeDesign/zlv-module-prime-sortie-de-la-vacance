@@ -31,12 +31,16 @@ export default function App() {
               title={
                 isEligible
                   ? `Votre logement pourrait être éligible à la prime de sortie de vacance de l'Anah !`
-                  : `Vous n'êtes malheureusement pas éligible à cette prime.`
+                  : `Votre logement n'est pas éligible à la prime de sortie de vacance de l'Anah.`
               }
               message={
                 isEligible
                   ? `La commune de ${selectedCommune} fait partie des zones rurales éligibles à la prime de sortie de vacance.`
-                  : `La commune de ${selectedCommune} ne fait pas partie des zones rurales éligibles à cette prime. Cependant, d'autres aides peuvent être disponibles pour votre projet.`
+                  : (
+                    <>
+                      La commune de {selectedCommune} ne fait pas partie des zones rurales éligibles à la prime de sortie de vacance. Cependant, vous pouvez vous rendre sur le site <a href="https://aides-territoires.beta.gouv.fr/aides/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>Aides-territoires</a> afin de voir si d'autres aides peuvent être disponibles pour votre projet.
+                    </>
+                  )
               }
             />
           )}

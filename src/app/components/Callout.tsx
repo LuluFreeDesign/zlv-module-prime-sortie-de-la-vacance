@@ -1,9 +1,10 @@
 import { CheckCircle, XCircle } from 'lucide-react';
+import { ReactNode } from 'react';
 
 interface CalloutProps {
   type: 'success' | 'error';
   title: string;
-  message: string;
+  message: string | ReactNode;
 }
 
 export function Callout({ type, title, message }: CalloutProps) {
