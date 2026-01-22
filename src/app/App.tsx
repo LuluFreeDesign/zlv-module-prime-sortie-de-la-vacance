@@ -30,12 +30,12 @@ export default function App() {
               type={isEligible ? 'success' : 'error'}
               title={
                 isEligible
-                  ? `Votre logement pourrait être éligible à la prime de sortie de vacance de l'ANAH !`
+                  ? `Votre logement pourrait être éligible à la prime de sortie de vacance de l'Anah !`
                   : `Vous n'êtes malheureusement pas éligible à cette prime.`
               }
               message={
                 isEligible
-                  ? `La commune de ${selectedCommune} fait partie des zones rurales éligibles à la prime de sortie de vacance. Consultez les autres conditions d'éligibilité sur le site de l'ANAH.`
+                  ? `La commune de ${selectedCommune} fait partie des zones rurales éligibles à la prime de sortie de vacance.`
                   : `La commune de ${selectedCommune} ne fait pas partie des zones rurales éligibles à cette prime. Cependant, d'autres aides peuvent être disponibles pour votre projet.`
               }
             />
@@ -43,9 +43,17 @@ export default function App() {
 
           {isEligible && (
             <div className="mt-6 p-4 border" style={{ borderColor: 'var(--border)', borderRadius: 'var(--radius)' }}>
-              <p className="mb-3" style={{ color: 'var(--foreground)', fontWeight: 'var(--font-weight-medium)' }}>
-                Pour bénéficier de cette prime, votre projet doit également respecter les conditions suivantes :
-              </p>
+              <h6 
+                className="mb-3"
+                style={{
+                  color: 'var(--foreground)',
+                  fontSize: 'var(--text-base)',
+                  fontWeight: 'var(--font-weight-medium)',
+                  lineHeight: '1.5'
+                }}
+              >
+                Conditions d'éligibilité à l'obtention de la prime :
+              </h6>
               <ul className="list-disc list-inside space-y-2 mb-6" style={{ color: 'var(--foreground)' }}>
                 <li>Le logement doit être vacant depuis au moins 2 ans</li>
                 <li>Les travaux doivent permettre une sortie de vacance effective</li>
