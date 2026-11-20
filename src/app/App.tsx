@@ -7,10 +7,13 @@ import { ExternalLink } from 'lucide-react';
 export default function App() {
   const [selectedCommune, setSelectedCommune] = useState<string | null>(null);
   const [isEligible, setIsEligible] = useState<boolean | null>(null);
+  // Incremented on each search so the result is re-announced even if the same commune is selected again
+  const [searchCount, setSearchCount] = useState(0);
 
   const handleSelectCommune = (commune: string, eligible: boolean) => {
     setSelectedCommune(commune);
     setIsEligible(eligible);
+    setSearchCount((count) => count + 1);
   };
 
   return (
@@ -25,25 +28,29 @@ export default function App() {
             communes={communes}
           />
 
-          {selectedCommune && isEligible !== null && (
-            <Callout
-              type={isEligible ? 'success' : 'error'}
-              title={
-                isEligible
-                  ? `Votre logement pourrait être éligible à la prime de sortie de vacance de l'Anah !`
-                  : `Votre logement n'est pas éligible à la prime de sortie de vacance de l'Anah.`
-              }
-              message={
-                isEligible
-                  ? `La commune de ${selectedCommune} fait partie des zones rurales éligibles à la prime de sortie de vacance.`
-                  : (
-                    <>
-                      La commune de {selectedCommune} ne fait pas partie des zones rurales éligibles à la prime de sortie de vacance. Cependant, vous pouvez vous rendre sur le site <a href="https://mesaides.france-renov.gouv.fr/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>Mes aides réno</a> afin de voir si d'autres aides peuvent être disponibles pour votre projet.
-                    </>
-                  )
-              }
-            />
-          )}
+          {/* Status message present from page load so screen readers announce the result (RGAA 7.5) */}
+          <div role="status" aria-live="polite" aria-atomic="true">
+            {selectedCommune && isEligible !== null && (
+              <Callout
+                key={searchCount}
+                type={isEligible ? 'success' : 'error'}
+                title={
+                  isEligible
+                    ? `Votre logement pourrait être éligible à la prime de sortie de vacance de l'Anah !`
+                    : `Votre logement n'est pas éligible à la prime de sortie de vacance de l'Anah.`
+                }
+                message={
+                  isEligible
+                    ? `La commune de ${selectedCommune} fait partie des zones rurales éligibles à la prime de sortie de vacance.`
+                    : (
+                      <>
+                        La commune de {selectedCommune} ne fait pas partie des zones rurales éligibles à la prime de sortie de vacance. Cependant, vous pouvez vous rendre sur le site <a href="https://mesaides.france-renov.gouv.fr/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>Mes aides réno</a> afin de voir si d'autres aides peuvent être disponibles pour votre projet.
+                      </>
+                    )
+                }
+              />
+            )}
+          </div>
 
           {isEligible && (
             <div className="mt-6 p-4 border" style={{ borderColor: 'var(--border)', borderRadius: 'var(--radius)' }}>
