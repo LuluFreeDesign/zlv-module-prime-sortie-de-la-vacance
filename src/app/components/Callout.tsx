@@ -21,9 +21,9 @@ export function Callout({ type, title, message }: CalloutProps) {
       <div className="flex gap-4">
         <div className="flex-shrink-0 pt-1">
           {isSuccess ? (
-            <CheckCircle className="w-6 h-6" style={{ color: 'var(--primary)' }} />
+            <CheckCircle aria-hidden="true" focusable="false" className="w-6 h-6" style={{ color: 'var(--primary)' }} />
           ) : (
-            <XCircle className="w-6 h-6" style={{ color: 'var(--destructive)' }} />
+            <XCircle aria-hidden="true" focusable="false" className="w-6 h-6" style={{ color: 'var(--destructive)' }} />
           )}
         </div>
         <div className="flex-1">
