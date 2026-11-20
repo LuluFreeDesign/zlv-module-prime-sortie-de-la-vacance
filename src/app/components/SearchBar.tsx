@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useId } from 'react';
 import { Search, X } from 'lucide-react';
 
 interface SearchBarProps {
@@ -12,6 +12,13 @@ export function SearchBar({ onSelectCommune, communes }: SearchBarProps) {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const listboxRef = useRef<HTMLUListElement>(null);
+
+  // Unique ids so the ARIA references stay valid even if the component is rendered more than once
+  const baseId = useId().replace(/:/g, '');
+  const listboxId = `commune-suggestions-${baseId}`;
+  const statusId = `commune-status-${baseId}`;
+  const optionId = (index: number) => `commune-option-${baseId}-${index}`;
 
   // Filter communes based on search query (by name or INSEE code)
   const filteredCommunes = searchQuery.trim().length >= 2
@@ -32,28 +39,67 @@ export function SearchBar({ onSelectCommune, communes }: SearchBarProps) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Handle keyboard navigation
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!showSuggestions || filteredCommunes.length === 0) return;
+  const isExpanded = showSuggestions && filteredCommunes.length > 0;
+  const activeIndex = isExpanded && selectedIndex < filteredCommunes.length ? selectedIndex : -1;
 
+  // Keep the active option visible inside the listbox.
+  // Scroll the listbox itself rather than calling scrollIntoView(), which would also
+  // scroll the parent page when the simulator is embedded in an iframe.
+  useEffect(() => {
+    const listbox = listboxRef.current;
+    if (!listbox || activeIndex < 0) return;
+    const option = listbox.children[activeIndex] as HTMLElement | undefined;
+    if (!option) return;
+    if (option.offsetTop < listbox.scrollTop) {
+      listbox.scrollTop = option.offsetTop;
+    } else if (option.offsetTop + option.offsetHeight > listbox.scrollTop + listbox.clientHeight) {
+      listbox.scrollTop = option.offsetTop + option.offsetHeight - listbox.clientHeight;
+    }
+  }, [activeIndex]);
+
+  // Keyboard navigation (WAI-ARIA combobox pattern)
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     switch (e.key) {
       case 'ArrowDown':
+        if (filteredCommunes.length === 0) return;
         e.preventDefault();
+        if (!showSuggestions) {
+          setShowSuggestions(true);
+          setSelectedIndex(0);
+          return;
+        }
         setSelectedIndex((prev) =>
-          prev < filteredCommunes.length - 1 ? prev + 1 : prev
+          prev < filteredCommunes.length - 1 ? prev + 1 : 0
         );
         break;
       case 'ArrowUp':
+        if (filteredCommunes.length === 0) return;
         e.preventDefault();
-        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
+        if (!showSuggestions) {
+          setShowSuggestions(true);
+          setSelectedIndex(filteredCommunes.length - 1);
+          return;
+        }
+        setSelectedIndex((prev) =>
+          prev > 0 ? prev - 1 : filteredCommunes.length - 1
+        );
         break;
       case 'Enter':
         e.preventDefault();
-        if (selectedIndex >= 0) {
-          handleSelectCommune(filteredCommunes[selectedIndex]);
+        if (activeIndex >= 0) {
+          handleSelectCommune(filteredCommunes[activeIndex]);
+        } else {
+          handleSearch();
         }
         break;
       case 'Escape':
+        if (isExpanded) {
+          e.preventDefault();
+          setShowSuggestions(false);
+          setSelectedIndex(-1);
+        }
+        break;
+      case 'Tab':
         setShowSuggestions(false);
         setSelectedIndex(-1);
         break;
@@ -133,7 +179,9 @@ export function SearchBar({ onSelectCommune, communes }: SearchBarProps) {
           <input
             ref={inputRef}
             id="commune-search"
-            type="search"
+            type="text"
+            role="combobox"
+            autoComplete="off"
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
@@ -153,8 +201,9 @@ export function SearchBar({ onSelectCommune, communes }: SearchBarProps) {
               boxShadow: 'inset 0 -2px 0 0 var(--primary)'
             }}
             aria-autocomplete="list"
-            aria-controls="commune-suggestions"
-            aria-expanded={showSuggestions && filteredCommunes.length > 0}
+            aria-controls={listboxId}
+            aria-expanded={isExpanded}
+            aria-activedescendant={activeIndex >= 0 ? optionId(activeIndex) : undefined}
           />
           
           <button
@@ -177,10 +226,13 @@ export function SearchBar({ onSelectCommune, communes }: SearchBarProps) {
         </div>
 
         {/* Suggestions dropdown */}
-        {showSuggestions && filteredCommunes.length > 0 && (
-          <ul
-            id="commune-suggestions"
+        {/* Listbox is always in the DOM so aria-controls never points to a missing id */}
+        <ul
+            ref={listboxRef}
+            id={listboxId}
             role="listbox"
+            aria-label="Communes suggérées"
+            hidden={!isExpanded}
             className="absolute z-50 w-full mt-1 border overflow-hidden"
             style={{
               borderColor: 'var(--border)',
@@ -191,15 +243,21 @@ export function SearchBar({ onSelectCommune, communes }: SearchBarProps) {
               overflowY: 'auto'
             }}
           >
-            {filteredCommunes.map((commune, index) => (
+            {isExpanded && filteredCommunes.map((commune, index) => (
               <li
-                key={index}
+                key={commune.inseeCode ?? `${commune.name}-${index}`}
+                id={optionId(index)}
                 role="option"
-                aria-selected={selectedIndex === index}
+                aria-selected={activeIndex === index}
+                // Keep focus on the input when clicking an option
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => handleSelectCommune(commune)}
                 className="px-4 py-2.5 cursor-pointer transition-colors border-b last:border-b-0"
                 style={{
-                  backgroundColor: selectedIndex === index ? 'var(--muted)' : 'transparent',
+                  backgroundColor: activeIndex === index ? 'var(--muted)' : 'transparent',
+                  // Visible indicator for the active option (contrast >= 3:1, RGAA 3.3 / 10.7)
+                  boxShadow: activeIndex === index ? 'inset 4px 0 0 0 var(--primary)' : 'none',
+                  textDecoration: activeIndex === index ? 'underline' : 'none',
                   borderColor: 'var(--border)',
                   color: 'var(--foreground)',
                   fontSize: 'var(--text-base)'
@@ -209,12 +267,21 @@ export function SearchBar({ onSelectCommune, communes }: SearchBarProps) {
                 {commune.name}
               </li>
             ))}
-          </ul>
-        )}
+        </ul>
+
+        {/* Status message announced to screen readers (RGAA 7.5) */}
+        <p id={statusId} role="status" className="sr-only">
+          {showSuggestions && searchQuery.trim().length >= 2
+            ? filteredCommunes.length === 0
+              ? 'Aucune commune trouvée'
+              : `${filteredCommunes.length} commune${filteredCommunes.length > 1 ? 's' : ''} suggérée${filteredCommunes.length > 1 ? 's' : ''}, utilisez les flèches haut et bas pour naviguer`
+            : ''}
+        </p>
 
         {/* No results message */}
         {showSuggestions && searchQuery.trim().length >= 2 && filteredCommunes.length === 0 && (
           <div
+            aria-hidden="true"
             className="absolute z-50 w-full mt-1 px-4 py-2.5 border"
             style={{
               borderColor: 'var(--border)',
