@@ -1,0 +1,57 @@
+/* Styles spécifiques au simulateur, construits avec les tokens DSFR */
+
+.zlv-combobox {
+  position: relative;
+}
+
+.zlv-combobox__listbox {
+  position: absolute;
+  z-index: 50;
+  left: 0;
+  right: 0;
+  margin: 0.25rem 0 0;
+  padding: 0;
+  list-style: none;
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: var(--background-overlap-grey);
+  border: 1px solid var(--border-default-grey);
+  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.1), 0 8px 16px -16px rgba(0, 0, 0, 0.32);
+}
+
+.zlv-combobox__listbox[hidden] {
+  display: none;
+}
+
+.zlv-combobox__option {
+  padding: 0.625rem 1rem;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border-default-grey);
+}
+
+.zlv-combobox__option:last-child {
+  border-bottom: none;
+}
+
+/* Option active : indicateur visible (contraste >= 3:1, RGAA 3.3 / 10.7) */
+.zlv-combobox__option[aria-selected='true'] {
+  background-color: var(--background-contrast-grey);
+  box-shadow: inset 4px 0 0 0 var(--border-action-high-blue-france);
+  text-decoration: underline;
+}
+
+.zlv-combobox__empty {
+  position: absolute;
+  z-index: 50;
+  left: 0;
+  right: 0;
+  margin-top: 0.25rem;
+  padding: 0.625rem 1rem;
+  background-color: var(--background-overlap-grey);
+  border: 1px solid var(--border-default-grey);
+  color: var(--text-mention-grey);
+}
+
+.zlv-conditions {
+  border: 1px solid var(--border-default-grey);
+}
