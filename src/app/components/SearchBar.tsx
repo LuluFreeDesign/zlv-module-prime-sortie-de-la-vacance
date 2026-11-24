@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect, useId } from 'react';
-import { Search, X } from 'lucide-react';
 
 interface SearchBarProps {
   onSelectCommune: (commune: string, isEligible: boolean) => void;
@@ -151,151 +150,82 @@ export function SearchBar({ onSelectCommune, communes }: SearchBarProps) {
   };
 
   return (
-    <div ref={searchRef} className="relative w-full">
-      <div className="relative">
-        <label 
-          htmlFor="commune-search" 
-          className="block mb-3"
-          style={{ 
-            color: 'var(--foreground)',
-            fontSize: 'var(--text-base)',
-            fontWeight: 'var(--font-weight-medium)'
+    <div ref={searchRef} className="zlv-combobox">
+      <label className="fr-label fr-mb-1w" htmlFor="commune-search">
+        Saisissez la commune dans laquelle se situe votre logement vacant
+        <span className="fr-hint-text">Nom de la commune ou code INSEE. Exemples : La Rochette, Nantes, 73215</span>
+      </label>
+
+      {/* Barre de recherche DSFR (le focus DSFR reste visible : outline 2px #0a76f6, RGAA 10.7) */}
+      <div className="fr-search-bar" role="search">
+        <input
+          ref={inputRef}
+          id="commune-search"
+          className="fr-input"
+          type="text"
+          role="combobox"
+          autoComplete="off"
+          value={searchQuery}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setShowSuggestions(true);
+            setSelectedIndex(-1);
           }}
-        >
-          Saisissez la commune dans laquelle se situe votre logement vacant
-        </label>
-        
-        <style>
-          {`
-            #commune-search::placeholder {
-              color: var(--muted-foreground);
-              opacity: 0.6;
-              font-style: italic;
-            }
-          `}
-        </style>
-        
-        <div className="relative flex">
-          <input
-            ref={inputRef}
-            id="commune-search"
-            type="text"
-            role="combobox"
-            autoComplete="off"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setShowSuggestions(true);
-              setSelectedIndex(-1);
-            }}
-            onFocus={() => setShowSuggestions(true)}
-            onKeyDown={handleKeyDown}
-            placeholder="Ex: La Rochette, Nantes, 73215..."
-            className="flex-1 px-4 py-2.5 border-t border-l border-b transition-colors"
-            style={{
-              borderColor: 'var(--border)',
-              backgroundColor: 'var(--muted)',
-              color: 'var(--foreground)',
-              borderRadius: '4px 0 0 0',
-              outline: 'none',
-              boxShadow: 'inset 0 -2px 0 0 var(--primary)'
-            }}
-            aria-autocomplete="list"
-            aria-controls={listboxId}
-            aria-expanded={isExpanded}
-            aria-activedescendant={activeIndex >= 0 ? optionId(activeIndex) : undefined}
-          />
-          
-          <button
-            type="button"
-            onClick={handleSearch}
-            className="px-4 py-2.5 border transition-colors flex items-center justify-center"
-            style={{
-              borderColor: 'var(--primary)',
-              backgroundColor: 'var(--primary)',
-              color: 'var(--primary-foreground)',
-              borderRadius: '0 4px 0 0',
-              minWidth: '3rem',
-              cursor: 'pointer'
-            }}
-            title="Rechercher"
-            aria-label="Rechercher"
-          >
-            <Search className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Suggestions dropdown */}
-        {/* Listbox is always in the DOM so aria-controls never points to a missing id */}
-        <ul
-            ref={listboxRef}
-            id={listboxId}
-            role="listbox"
-            aria-label="Communes suggérées"
-            hidden={!isExpanded}
-            className="absolute z-50 w-full mt-1 border overflow-hidden"
-            style={{
-              borderColor: 'var(--border)',
-              backgroundColor: 'var(--popover)',
-              borderRadius: '0',
-              boxShadow: '0 8px 16px 0 rgba(0, 0, 0, 0.1), 0 8px 16px -16px rgba(0, 0, 0, 0.32)',
-              maxHeight: '300px',
-              overflowY: 'auto'
-            }}
-          >
-            {isExpanded && filteredCommunes.map((commune, index) => (
-              <li
-                key={commune.inseeCode ?? `${commune.name}-${index}`}
-                id={optionId(index)}
-                role="option"
-                aria-selected={activeIndex === index}
-                // Keep focus on the input when clicking an option
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => handleSelectCommune(commune)}
-                className="px-4 py-2.5 cursor-pointer transition-colors border-b last:border-b-0"
-                style={{
-                  backgroundColor: activeIndex === index ? 'var(--muted)' : 'transparent',
-                  // Visible indicator for the active option (contrast >= 3:1, RGAA 3.3 / 10.7)
-                  boxShadow: activeIndex === index ? 'inset 4px 0 0 0 var(--primary)' : 'none',
-                  textDecoration: activeIndex === index ? 'underline' : 'none',
-                  borderColor: 'var(--border)',
-                  color: 'var(--foreground)',
-                  fontSize: 'var(--text-base)'
-                }}
-                onMouseEnter={() => setSelectedIndex(index)}
-              >
-                {commune.name}
-              </li>
-            ))}
-        </ul>
-
-        {/* Status message announced to screen readers (RGAA 7.5) */}
-        <p id={statusId} role="status" className="sr-only">
-          {showSuggestions && searchQuery.trim().length >= 2
-            ? filteredCommunes.length === 0
-              ? 'Aucune commune trouvée'
-              : `${filteredCommunes.length} commune${filteredCommunes.length > 1 ? 's' : ''} suggérée${filteredCommunes.length > 1 ? 's' : ''}, utilisez les flèches haut et bas pour naviguer`
-            : ''}
-        </p>
-
-        {/* No results message */}
-        {showSuggestions && searchQuery.trim().length >= 2 && filteredCommunes.length === 0 && (
-          <div
-            aria-hidden="true"
-            className="absolute z-50 w-full mt-1 px-4 py-2.5 border"
-            style={{
-              borderColor: 'var(--border)',
-              backgroundColor: 'var(--popover)',
-              color: 'var(--muted-foreground)',
-              borderRadius: '0',
-              boxShadow: '0 8px 16px 0 rgba(0, 0, 0, 0.1), 0 8px 16px -16px rgba(0, 0, 0, 0.32)',
-              fontSize: 'var(--text-base)'
-            }}
-          >
-            Aucune commune trouvée
-          </div>
-        )}
+          onFocus={() => setShowSuggestions(true)}
+          onKeyDown={handleKeyDown}
+          placeholder="Ex : La Rochette, Nantes, 73215"
+          aria-autocomplete="list"
+          aria-controls={listboxId}
+          aria-expanded={isExpanded}
+          aria-activedescendant={activeIndex >= 0 ? optionId(activeIndex) : undefined}
+        />
+        <button type="button" className="fr-btn" onClick={handleSearch} title="Rechercher">
+          Rechercher
+        </button>
       </div>
+
+      {/* Suggestions dropdown */}
+      {/* Listbox is always in the DOM so aria-controls never points to a missing id */}
+      <ul
+        ref={listboxRef}
+        id={listboxId}
+        role="listbox"
+        aria-label="Communes suggérées"
+        hidden={!isExpanded}
+        className="zlv-combobox__listbox"
+      >
+        {isExpanded && filteredCommunes.map((commune, index) => (
+          <li
+            key={commune.inseeCode ?? `${commune.name}-${index}`}
+            id={optionId(index)}
+            role="option"
+            aria-selected={activeIndex === index}
+            // Keep focus on the input when clicking an option
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => handleSelectCommune(commune)}
+            onMouseEnter={() => setSelectedIndex(index)}
+            className="zlv-combobox__option"
+          >
+            {commune.name}
+          </li>
+        ))}
+      </ul>
+
+      {/* Status message announced to screen readers (RGAA 7.5) */}
+      <p id={statusId} role="status" className="fr-sr-only">
+        {showSuggestions && searchQuery.trim().length >= 2
+          ? filteredCommunes.length === 0
+            ? 'Aucune commune trouvée'
+            : `${filteredCommunes.length} commune${filteredCommunes.length > 1 ? 's' : ''} suggérée${filteredCommunes.length > 1 ? 's' : ''}, utilisez les flèches haut et bas pour naviguer`
+          : ''}
+      </p>
+
+      {/* No results message */}
+      {showSuggestions && searchQuery.trim().length >= 2 && filteredCommunes.length === 0 && (
+        <div aria-hidden="true" className="zlv-combobox__empty">
+          Aucune commune trouvée
+        </div>
+      )}
     </div>
   );
 }

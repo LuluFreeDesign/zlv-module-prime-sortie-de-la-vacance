@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { SearchBar } from '@/app/components/SearchBar';
 import { Callout } from '@/app/components/Callout';
 import { communes } from '@/data/communes';
-import { ExternalLink } from 'lucide-react';
 
 export default function App() {
   const [selectedCommune, setSelectedCommune] = useState<string | null>(null);
@@ -17,111 +16,78 @@ export default function App() {
   };
 
   return (
-    <div 
-      className="min-h-screen p-6 md:p-8"
-      style={{ backgroundColor: 'var(--background)' }}
-    >
-      <div className="max-w-3xl mx-auto">
-        <main>
-          <SearchBar 
-            onSelectCommune={handleSelectCommune}
-            communes={communes}
-          />
+    <div className="fr-container fr-py-4w">
+      <main>
+        <SearchBar
+          onSelectCommune={handleSelectCommune}
+          communes={communes}
+        />
 
-          {/* Status message present from page load so screen readers announce the result (RGAA 7.5) */}
-          <div role="status" aria-live="polite" aria-atomic="true">
-            {selectedCommune && isEligible !== null && (
-              <Callout
-                key={searchCount}
-                type={isEligible ? 'success' : 'error'}
-                title={
-                  isEligible
-                    ? `Votre logement pourrait être éligible à la prime de sortie de vacance de l'Anah !`
-                    : `Votre logement n'est pas éligible à la prime de sortie de vacance de l'Anah.`
-                }
-                message={
-                  isEligible
-                    ? `La commune de ${selectedCommune} fait partie des zones rurales éligibles à la prime de sortie de vacance.`
-                    : (
-                      <>
-                        La commune de {selectedCommune} ne fait pas partie des zones rurales éligibles à la prime de sortie de vacance. Cependant, vous pouvez vous rendre sur le site <a href="https://mesaides.france-renov.gouv.fr/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>Mes aides réno</a> afin de voir si d'autres aides peuvent être disponibles pour votre projet.
-                      </>
-                    )
-                }
-              />
-            )}
-          </div>
+        {/* Status message present from page load so screen readers announce the result (RGAA 7.5) */}
+        <div role="status" aria-live="polite" aria-atomic="true">
+          {selectedCommune && isEligible !== null && (
+            <Callout
+              key={searchCount}
+              type={isEligible ? 'success' : 'error'}
+              title={
+                isEligible
+                  ? `Votre logement pourrait être éligible à la prime de sortie de vacance de l'Anah !`
+                  : `Votre logement n'est pas éligible à la prime de sortie de vacance de l'Anah.`
+              }
+              message={
+                isEligible
+                  ? `La commune de ${selectedCommune} fait partie des zones rurales éligibles à la prime de sortie de vacance.`
+                  : (
+                    <>
+                      La commune de {selectedCommune} ne fait pas partie des zones rurales éligibles à la prime de sortie de vacance. Cependant, vous pouvez vous rendre sur le site <a href="https://mesaides.france-renov.gouv.fr/" target="_blank" rel="noopener noreferrer" title="Mes aides réno - nouvelle fenêtre">Mes aides réno</a> afin de voir si d'autres aides peuvent être disponibles pour votre projet.
+                    </>
+                  )
+              }
+            />
+          )}
+        </div>
 
-          {isEligible && (
-            <div className="mt-6 p-4 border" style={{ borderColor: 'var(--border)', borderRadius: 'var(--radius)' }}>
-              <h6 
-                className="mb-3"
-                style={{
-                  color: 'var(--foreground)',
-                  fontSize: 'var(--text-base)',
-                  fontWeight: 'var(--font-weight-medium)',
-                  lineHeight: '1.5'
-                }}
-              >
-                Conditions d'éligibilité à l'obtention de la prime :
-              </h6>
-              <ul className="list-disc list-inside space-y-2 mb-6" style={{ color: 'var(--foreground)' }}>
-                <li>Le logement doit être vacant depuis au moins 2 ans</li>
-                <li>Les travaux doivent permettre une sortie de vacance effective</li>
-                <li>Le projet doit respecter les critères de performance énergétique</li>
-              </ul>
-              
-              <h6 
-                className="mb-2"
-                style={{
-                  color: 'var(--foreground)',
-                  fontSize: 'var(--text-base)',
-                  fontWeight: 'var(--font-weight-medium)',
-                  lineHeight: '1.5'
-                }}
-              >
-                Comment obtenir la prime ?
-              </h6>
-              <p className="mb-4" style={{ color: 'var(--foreground)' }}>
-                Pour obtenir la prime, contactez votre conseiller local France Rénov'. Il vous guidera à travers les démarches nécessaires pour déposer votre demande de subvention et de prime.
-              </p>
-              
-              <div className="flex flex-wrap gap-3">
+        {isEligible && (
+          <div className="zlv-conditions fr-mt-3w fr-p-3w">
+            <h3 className="fr-h6 fr-mb-2w">Conditions d'éligibilité à l'obtention de la prime :</h3>
+            <ul className="fr-mb-3w">
+              <li>Le logement doit être vacant depuis au moins 2 ans</li>
+              <li>Les travaux doivent permettre une sortie de vacance effective</li>
+              <li>Le projet doit respecter les critères de performance énergétique</li>
+            </ul>
+
+            <h3 className="fr-h6 fr-mb-1w">Comment obtenir la prime ?</h3>
+            <p>
+              Pour obtenir la prime, contactez votre conseiller local France Rénov'. Il vous guidera à travers les démarches nécessaires pour déposer votre demande de subvention et de prime.
+            </p>
+
+            <ul className="fr-btns-group fr-btns-group--inline-md">
+              <li>
                 <a
+                  className="fr-btn"
                   href="https://france-renov.gouv.fr/preparer-projet/trouver-conseiller"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 hover:opacity-90 transition-opacity"
-                  style={{
-                    backgroundColor: 'var(--primary)',
-                    color: 'var(--primary-foreground)',
-                    borderRadius: 'var(--radius)',
-                    fontWeight: 'var(--font-weight-medium)'
-                  }}
+                  title="Contacter mon conseiller - nouvelle fenêtre"
                 >
-                  <ExternalLink className="w-4 h-4" />
                   Contacter mon conseiller
                 </a>
+              </li>
+              <li>
                 <a
+                  className="fr-btn fr-btn--secondary"
                   href="https://aides-territoires.beta.gouv.fr/aides/prime-sortie-de-la-vacance/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 border hover:opacity-70 transition-opacity"
-                  style={{
-                    backgroundColor: 'transparent',
-                    color: 'var(--primary)',
-                    borderColor: 'var(--border)',
-                    borderRadius: 'var(--radius)',
-                    fontWeight: 'var(--font-weight-medium)'
-                  }}
+                  title="Consulter les conditions détaillées - nouvelle fenêtre"
                 >
                   Consulter les conditions détaillées
                 </a>
-              </div>
-            </div>
-          )}
-        </main>
-      </div>
+              </li>
+            </ul>
+          </div>
+        )}
+      </main>
     </div>
   );
 }
